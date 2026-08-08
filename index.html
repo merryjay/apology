@@ -241,11 +241,11 @@
     position: relative;
     z-index: 1;
     width: min(680px, 100%);
-    min-height: clamp(500px, 64vh, 640px);
+    min-height: clamp(460px, 60vh, 600px);
     display: flex;
     flex-direction: column;
     border-radius: 34px;
-    padding: clamp(30px, 6vw, 46px) clamp(22px, 5vw, 44px);
+    padding: clamp(24px, 5vw, 36px) clamp(20px, 5vw, 44px);
     text-align: center;
     transform-style: preserve-3d;
     will-change: transform;
@@ -305,7 +305,7 @@
     border-radius: 999px;
     padding: 2px 18px 0;
     line-height: 1.7;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   h1 {
@@ -318,7 +318,7 @@
   }
 
   .sub {
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: clamp(0.95rem, 2.6vw, 1.05rem);
     font-weight: 600;
     line-height: 1.65;
@@ -346,8 +346,11 @@
 
   .result-bottom {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    gap: 22px;
+    margin-top: 24px;
   }
 
   @keyframes fadeUp {
@@ -403,8 +406,8 @@
 
   #arena {
     position: relative;
-    height: clamp(200px, 38vh, 360px);
-    margin-top: clamp(20px, 4vw, 30px);
+    height: clamp(180px, 36vh, 340px);
+    margin-top: clamp(16px, 3vw, 22px);
   }
 
   #btn-yes {
@@ -504,23 +507,23 @@
   .apology {
     margin-top: 16px;
     text-align: center;
-    font-size: clamp(0.95rem, 2.6vw, 1.05rem);
+    font-size: clamp(0.92rem, 2.5vw, 1rem);
     font-weight: 600;
-    line-height: 1.75;
+    line-height: 1.62;
     color: #7c5a6b;
   }
 
-  .apology p + p { margin-top: 14px; }
+  .apology p + p { margin-top: 12px; }
 
   .apology .closing {
     font-weight: 800;
     color: var(--plum-ink);
-    margin-top: 20px;
+    margin-top: 16px;
   }
 
   .heart {
     position: relative;
-    margin: 30px auto 0;
+    margin: 0 auto;
     width: 24px;
     height: 24px;
     background: #e08aa6;
@@ -551,7 +554,7 @@
 
   .restart {
     display: inline-block;
-    margin-top: 28px;
+    margin-top: 0;
     font: inherit;
     font-size: 0.9rem;
     font-weight: 700;
@@ -572,7 +575,7 @@
     align-items: center;
     gap: 10px;
     margin-top: auto;
-    padding-top: clamp(22px, 4vw, 30px);
+    padding-top: clamp(16px, 3vw, 22px);
   }
 
   .dot {
