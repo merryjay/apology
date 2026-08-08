@@ -295,7 +295,7 @@
     background: linear-gradient(160deg, #ffffff, #f8e8ee);
     border: 1.5px solid rgba(198, 112, 143, 0.5);
     box-shadow: 0 8px 18px -12px rgba(166, 79, 118, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.9);
-    transition: left 0.14s ease-in-out, top 0.14s ease-in-out, box-shadow 0.25s ease;
+    transition: left 0.08s ease-out, top 0.08s ease-out, box-shadow 0.25s ease;
   }
 
   #btn-no::before {
@@ -583,8 +583,8 @@
     if (!placed) {
       best = { x: (minCX + maxCX) / 2, y: (minCY + maxCY) / 2 };
     } else if (far) {
-      var MIN_D = 240;
-      var MAX_D = 360;
+      var MIN_D = 300;
+      var MAX_D = 500;
       var near = null;
       var farEnd = null;
       for (var j = 0; j < 60 && !best; j++) {
