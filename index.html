@@ -445,48 +445,14 @@
   }
 
   #btn-no.squish {
-    animation: squish 0.4s var(--ease);
+    animation: squish 0.3s var(--ease);
   }
 
   @keyframes squish {
-    0%  { transform: translate(-50%, -50%) rotate(0) scale(1); }
-    30% { transform: translate(-50%, -50%) rotate(-8deg) scale(1.18, 0.8); }
-    55% { transform: translate(-50%, -50%) rotate(6deg) scale(0.88, 1.14); }
-    80% { transform: translate(-50%, -50%) rotate(-3deg) scale(1.04, 0.95); }
-    100%{ transform: translate(-50%, -50%) rotate(0) scale(1); }
-  }
-
-  .poof {
-    position: absolute;
-    z-index: 2;
-    pointer-events: none;
-    width: 26px;
-    height: 26px;
-    background: radial-gradient(circle at 35% 35%, #f3a5bd, #dd6f96);
-    border-radius: 4px;
-    transform: rotate(-45deg);
-    opacity: 0;
-    animation: poof 0.65s var(--ease) forwards;
-  }
-
-  .poof::before,
-  .poof::after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: inherit;
-    border-radius: 50%;
-  }
-
-  .poof::before { top: -50%; left: 0; }
-  .poof::after  { top: 0; left: 50%; }
-
-  @keyframes poof {
-    0%   { opacity: 0; transform: rotate(-45deg) scale(0.3); }
-    30%  { opacity: 0.9; }
-    70%  { opacity: 0.6; }
-    100% { opacity: 0; transform: rotate(-45deg) scale(1.7); }
+    0%  { transform: translate(-50%, -50%) scale(1); }
+    35% { transform: translate(-50%, -50%) scale(1.07, 0.92); }
+    70% { transform: translate(-50%, -50%) scale(0.97, 1.06); }
+    100%{ transform: translate(-50%, -50%) scale(1); }
   }
 
   .apology {
@@ -583,7 +549,6 @@
     .screen.active { animation: none; }
     .card { transition-duration: 0.05s; }
     .scene { transition-duration: 0.2s; }
-    .poof { display: none; }
     #btn-no { transition-duration: 0.05s; animation: none; }
     #btn-no.squish { animation: none; }
     .heart { animation: none; }
@@ -753,6 +718,7 @@
   }
 
   var placed = false;
+  var lastPX = null, lastPY = null;
 
   function placeNo(far) {
     var aRect = arena.getBoundingClientRect();
@@ -778,18 +744,33 @@
     } else if (far) {
       var MIN_D = 300;
       var MAX_D = 500;
+      var px0 = lastPX != null ? lastPX : (minCX + maxCX) / 2;
+      var py0 = lastPY != null ? lastPY : (minCY + maxCY) / 2;
+      var base = Math.atan2(cy - py0, cx - px0);
       var near = null;
       var farEnd = null;
       for (var j = 0; j < 60 && !best; j++) {
-        x = minCX + Math.random() * spanX;
-        y = minCY + Math.random() * spanY;
+        var ang = base + (Math.random() - 0.5) * 1.2;
+        var d = MIN_D + Math.random() * (MAX_D - MIN_D);
+        x = cx + Math.cos(ang) * d;
+        y = cy + Math.sin(ang) * d;
+        if (x < minCX || x > maxCX || y < minCY || y > maxCY) continue;
         if (overlaps(x - w / 2, y - h / 2, w, h, yRect)) continue;
-        var d = Math.abs(x - cx) + Math.abs(y - cy);
-        if (d >= MIN_D && d <= MAX_D) { best = { x: x, y: y, d: d }; break; }
-        if (d >= MIN_D && (!near || d < near.d)) near = { x: x, y: y, d: d };
-        if (!farEnd || d > farEnd.d) farEnd = { x: x, y: y, d: d };
+        best = { x: x, y: y, d: d };
+        break;
       }
-      if (!best) best = near || farEnd || { x: (minCX + maxCX) / 2, y: (minCY + maxCY) / 2 };
+      if (!best) {
+        for (var k = 0; k < 60 && !best; k++) {
+          x = minCX + Math.random() * spanX;
+          y = minCY + Math.random() * spanY;
+          if (overlaps(x - w / 2, y - h / 2, w, h, yRect)) continue;
+          var dd = Math.abs(x - cx) + Math.abs(y - cy);
+          if (dd >= MIN_D && dd <= MAX_D) { best = { x: x, y: y, d: dd }; break; }
+          if (dd >= MIN_D && (!near || dd < near.d)) near = { x: x, y: y, d: dd };
+          if (!farEnd || dd > farEnd.d) farEnd = { x: x, y: y, d: dd };
+        }
+        if (!best) best = near || farEnd || { x: (minCX + maxCX) / 2, y: (minCY + maxCY) / 2 };
+      }
     } else {
       for (var i = 0; i < 40; i++) {
         x = minCX + Math.random() * spanX;
@@ -805,27 +786,16 @@
     placed = true;
   }
 
-  function spawnPoof(x, y, w, h) {
-    if (reduced) return;
-    var aRect = arena.getBoundingClientRect();
-    var p = document.createElement('span');
-    p.className = 'poof';
-    p.style.left = (x - aRect.left + w / 2 - 13) + 'px';
-    p.style.top = (y - aRect.top + h / 2 - 13) + 'px';
-    arena.appendChild(p);
-    setTimeout(function () { p.remove(); }, 750);
-  }
-
   function dodge() {
-    var before = noBtn.getBoundingClientRect();
     placeNo(true);
-    spawnPoof(before.left, before.top, before.width, before.height);
     noBtn.classList.remove('squish');
     void noBtn.offsetWidth;
     noBtn.classList.add('squish');
   }
 
   document.addEventListener('pointermove', function (e) {
+    lastPX = e.clientX;
+    lastPY = e.clientY;
     var b = noBtn.getBoundingClientRect();
     var cx = b.left + b.width / 2;
     var cy = b.top + b.height / 2;
@@ -836,6 +806,8 @@
 
   noBtn.addEventListener('pointerdown', function (e) {
     e.preventDefault();
+    lastPX = e.clientX;
+    lastPY = e.clientY;
     dodge();
   }, { passive: false });
 
