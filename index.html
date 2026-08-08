@@ -242,6 +242,8 @@
     z-index: 1;
     width: min(680px, 100%);
     min-height: clamp(500px, 64vh, 640px);
+    max-height: min(720px, calc(100vh - 44px));
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     border-radius: 34px;
@@ -330,6 +332,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    justify-content: safe center;
     flex: 1;
     animation: fadeUp 0.8s var(--ease) both;
   }
@@ -410,7 +413,7 @@
     background: linear-gradient(160deg, #ffffff, #f8e8ee);
     border: 1.5px solid rgba(198, 112, 143, 0.5);
     box-shadow: 0 8px 18px -12px rgba(166, 79, 118, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.9);
-    transition: left 0.08s ease-out, top 0.08s ease-out, box-shadow 0.25s ease;
+    transition: left 0.05s ease-out, top 0.05s ease-out, box-shadow 0.25s ease;
   }
 
   #btn-no::before {
@@ -442,33 +445,53 @@
   }
 
   #btn-no.squish {
-    animation: squish 0.28s var(--ease);
+    animation: squish 0.4s var(--ease);
   }
 
   @keyframes squish {
-    0%  { transform: translate(-50%, -50%) scale(1); }
-    35% { transform: translate(-50%, -50%) scale(1.06, 0.92); }
-    70% { transform: translate(-50%, -50%) scale(0.97, 1.06); }
-    100%{ transform: translate(-50%, -50%) scale(1); }
+    0%  { transform: translate(-50%, -50%) rotate(0) scale(1); }
+    30% { transform: translate(-50%, -50%) rotate(-8deg) scale(1.18, 0.8); }
+    55% { transform: translate(-50%, -50%) rotate(6deg) scale(0.88, 1.14); }
+    80% { transform: translate(-50%, -50%) rotate(-3deg) scale(1.04, 0.95); }
+    100%{ transform: translate(-50%, -50%) rotate(0) scale(1); }
   }
 
-  .ripple {
+  .poof {
     position: absolute;
     z-index: 2;
     pointer-events: none;
-    border: 1.5px solid rgba(231, 131, 155, 0.35);
-    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    background: radial-gradient(circle at 35% 35%, #f3a5bd, #dd6f96);
+    border-radius: 4px;
+    transform: rotate(-45deg);
     opacity: 0;
-    animation: ripple 0.5s ease-out forwards;
+    animation: poof 0.65s var(--ease) forwards;
   }
 
-  @keyframes ripple {
-    from { opacity: 0.4; transform: scale(0.6); }
-    to   { opacity: 0; transform: scale(1.25); }
+  .poof::before,
+  .poof::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: 50%;
+  }
+
+  .poof::before { top: -50%; left: 0; }
+  .poof::after  { top: 0; left: 50%; }
+
+  @keyframes poof {
+    0%   { opacity: 0; transform: rotate(-45deg) scale(0.3); }
+    30%  { opacity: 0.9; }
+    70%  { opacity: 0.6; }
+    100% { opacity: 0; transform: rotate(-45deg) scale(1.7); }
   }
 
   .apology {
     margin-top: 16px;
+    text-align: center;
     font-size: clamp(0.95rem, 2.6vw, 1.05rem);
     font-weight: 600;
     line-height: 1.75;
@@ -560,7 +583,7 @@
     .screen.active { animation: none; }
     .card { transition-duration: 0.05s; }
     .scene { transition-duration: 0.2s; }
-    .ripple { display: none; }
+    .poof { display: none; }
     #btn-no { transition-duration: 0.05s; animation: none; }
     #btn-no.squish { animation: none; }
     .heart { animation: none; }
@@ -646,7 +669,7 @@
   var yesBtn = document.getElementById('btn-yes');
   var dots = document.querySelectorAll('.dot');
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var PROXIMITY = 80;
+  var PROXIMITY = 95;
   var lastSwitch = 0;
   var scene = document.getElementById('scene');
   var hearts = document.getElementById('hearts');
@@ -782,24 +805,21 @@
     placed = true;
   }
 
-  function spawnRipple(x, y, w, h) {
+  function spawnPoof(x, y, w, h) {
     if (reduced) return;
     var aRect = arena.getBoundingClientRect();
-    var r = document.createElement('span');
-    r.className = 'ripple';
-    var d = Math.max(w, h) * 1.05;
-    r.style.width = d + 'px';
-    r.style.height = d + 'px';
-    r.style.left = (x - aRect.left + w / 2 - d / 2) + 'px';
-    r.style.top = (y - aRect.top + h / 2 - d / 2) + 'px';
-    arena.appendChild(r);
-    setTimeout(function () { r.remove(); }, 700);
+    var p = document.createElement('span');
+    p.className = 'poof';
+    p.style.left = (x - aRect.left + w / 2 - 13) + 'px';
+    p.style.top = (y - aRect.top + h / 2 - 13) + 'px';
+    arena.appendChild(p);
+    setTimeout(function () { p.remove(); }, 750);
   }
 
   function dodge() {
     var before = noBtn.getBoundingClientRect();
     placeNo(true);
-    spawnRipple(before.left, before.top, before.width, before.height);
+    spawnPoof(before.left, before.top, before.width, before.height);
     noBtn.classList.remove('squish');
     void noBtn.offsetWidth;
     noBtn.classList.add('squish');
