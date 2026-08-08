@@ -242,6 +242,10 @@
     z-index: 1;
     width: min(680px, 100%);
     min-height: clamp(460px, 60vh, 600px);
+    max-height: calc(100vh - 36px);
+    max-height: calc(100dvh - 36px);
+    overflow-y: auto;
+    scrollbar-width: none;
     display: flex;
     flex-direction: column;
     border-radius: 34px;
@@ -259,6 +263,10 @@
       0 24px 60px -18px rgba(18, 7, 28, 0.6),
       0 40px 90px -30px rgba(20, 8, 30, 0.45);
     transition: transform 0.2s ease-out;
+  }
+
+  .card::-webkit-scrollbar {
+    display: none;
   }
 
   .card::before {
@@ -507,18 +515,26 @@
   .apology {
     margin-top: 16px;
     text-align: center;
-    font-size: clamp(0.92rem, 2.5vw, 1rem);
+    font-family: var(--script);
+    font-size: clamp(1.15rem, 2.9vw, 1.35rem);
     font-weight: 600;
-    line-height: 1.62;
+    line-height: 1.45;
     color: #7c5a6b;
   }
 
   .apology p + p { margin-top: 12px; }
 
   .apology .closing {
-    font-weight: 800;
+    font-weight: 700;
     color: var(--plum-ink);
     margin-top: 16px;
+  }
+
+  .apology .signoff {
+    font-size: clamp(1.4rem, 3.4vw, 1.65rem);
+    font-weight: 700;
+    color: var(--rose-deep);
+    margin-top: 22px;
   }
 
   .heart {
@@ -592,6 +608,47 @@
     box-shadow: 0 0 12px rgba(224, 138, 166, 0.7);
   }
 
+  .card.scrollable::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    display: block;
+    height: 70px;
+    margin-top: -70px;
+    background: linear-gradient(to top, rgba(255, 247, 249, 0.98) 25%, rgba(255, 247, 249, 0));
+    pointer-events: none;
+  }
+
+  .morehint {
+    position: sticky;
+    bottom: 14px;
+    align-self: center;
+    margin-top: -52px;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(224, 138, 166, 0.18);
+    color: var(--rose-deep);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease);
+    animation: hintjump 1.4s ease-in-out infinite;
+  }
+
+  .morehint.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @keyframes hintjump {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(5px); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .blob, .twinkle { animation: none; }
     .hearts { display: none; }
@@ -656,11 +713,14 @@
       <span class="eyebrow">A real apology</span>
       <h1 tabindex="-1">I&rsquo;m sorry &mdash; really.</h1>
     </div>
-    <!-- SWAP THIS TEXT BEFORE SENDING: your own words go here, keep the .closing paragraph if you like -->
     <div class="apology">
-      <p>I hope the little chase made you smile, because what follows is completely sincere. I keep replaying what I said, and I don&rsquo;t like how it sounded, and I like even less how it made you feel. There isn&rsquo;t a good excuse, so I won&rsquo;t reach for one &mdash; it was my fault, and I&rsquo;m sorry you carried that.</p>
-      <p>Mostly I&rsquo;m sorry for being quiet when I should have spoken up, and for pushing away while hoping you&rsquo;d stay close. You matter more to me than being right ever will.</p>
+      <p>I sincerely want to apologize for the things I said to you. The truth is, I&rsquo;ve realized that I&rsquo;m not ready to enter a relationship right now. It&rsquo;s not because I don&rsquo;t appreciate you or the feelings you&rsquo;ve shown me. I just feel like I need to settle myself first.</p>
+      <p>I want to become more stable &mdash; not only financially, but also mentally and emotionally. I want to take time to understand myself, heal, grow, and become the kind of person who is truly ready to share her life with someone.</p>
+      <p>I wish I had the courage to enter a relationship right now, but I know that forcing myself into something I&rsquo;m not ready for could eventually hurt both of us. I don&rsquo;t want to make promises I can&rsquo;t keep or give you less than what you deserve.</p>
+      <p>I&rsquo;m sorry if I confused you or made you expect something from me. Please know that this isn&rsquo;t because you&rsquo;re not enough. I just need time to become ready for something as meaningful as a relationship.</p>
+      <p>Thank you for understanding and for everything you&rsquo;ve shown me. I&rsquo;ll always be grateful for that.</p>
       <p class="closing">Take your time. I&rsquo;m here, and I&rsquo;m listening.</p>
+      <p class="signoff">From your beloved, Merry ❤️</p>
     </div>
     <div class="result-bottom">
       <div class="heart" aria-hidden="true"></div>
@@ -673,6 +733,8 @@
     <span class="dot"></span>
     <span class="dot"></span>
   </nav>
+
+  <button class="morehint" id="morehint" tabindex="-1" aria-label="Scroll to read the rest">&darr;</button>
 
 </main>
 </div>
@@ -687,6 +749,7 @@
   var noBtn = document.getElementById('btn-no');
   var yesBtn = document.getElementById('btn-yes');
   var dots = document.querySelectorAll('.dot');
+  var moreHint = document.getElementById('morehint');
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var PROXIMITY = 95;
   var lastSwitch = 0;
@@ -748,6 +811,20 @@
     }
   }, true);
 
+  function updateMoreHint() {
+    if (!moreHint) return;
+    var resultActive = document.getElementById('screen-result').classList.contains('active');
+    var scrollable = card.scrollHeight > card.clientHeight + 4;
+    moreHint.classList.toggle('show', resultActive && scrollable);
+    card.classList.toggle('scrollable', scrollable);
+  }
+
+  if (moreHint) {
+    moreHint.addEventListener('click', function () {
+      card.scrollTo({ top: card.scrollHeight, behavior: 'smooth' });
+    });
+  }
+
   function goTo(name) {
     var idx = ORDER.indexOf(name);
     if (idx < 0) return;
@@ -764,6 +841,13 @@
       dots[d].classList.toggle('active', filled);
       if (filled) dots[d].setAttribute('aria-current', 'step');
       else dots[d].removeAttribute('aria-current');
+    }
+    updateMoreHint();
+    if (name === 'result') {
+      setTimeout(updateMoreHint, 500);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(updateMoreHint);
+      }
     }
   }
 
@@ -904,8 +988,8 @@
     goTo('landing');
   });
 
-  window.addEventListener('resize', placeNo);
-  window.addEventListener('orientationchange', placeNo);
+  window.addEventListener('resize', function () { placeNo(); updateMoreHint(); });
+  window.addEventListener('orientationchange', function () { placeNo(); updateMoreHint(); });
 
   document.addEventListener('DOMContentLoaded', function () {
     spawnHearts();
