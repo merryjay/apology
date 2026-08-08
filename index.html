@@ -335,6 +335,16 @@
     animation: fadeUp 0.8s var(--ease) both;
   }
 
+  #screen-result {
+    justify-content: space-between;
+  }
+
+  .result-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: none; }
@@ -411,7 +421,7 @@
     background: linear-gradient(160deg, #ffffff, #f8e8ee);
     border: 1.5px solid rgba(198, 112, 143, 0.5);
     box-shadow: 0 8px 18px -12px rgba(166, 79, 118, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.9);
-    transition: left 0.05s ease-out, top 0.05s ease-out, box-shadow 0.25s ease;
+    transition: left 0.02s ease-out, top 0.02s ease-out, box-shadow 0.25s ease;
   }
 
   #btn-no::before {
@@ -634,16 +644,20 @@
   </section>
 
   <section id="screen-result" class="screen" role="group" aria-label="An apology">
-    <span class="eyebrow">A real apology</span>
-    <h1 tabindex="-1">I&rsquo;m sorry &mdash; really.</h1>
+    <div class="result-top">
+      <span class="eyebrow">A real apology</span>
+      <h1 tabindex="-1">I&rsquo;m sorry &mdash; really.</h1>
+    </div>
     <!-- SWAP THIS TEXT BEFORE SENDING: your own words go here, keep the .closing paragraph if you like -->
     <div class="apology">
       <p>I hope the little chase made you smile, because what follows is completely sincere. I keep replaying what I said, and I don&rsquo;t like how it sounded, and I like even less how it made you feel. There isn&rsquo;t a good excuse, so I won&rsquo;t reach for one &mdash; it was my fault, and I&rsquo;m sorry you carried that.</p>
       <p>Mostly I&rsquo;m sorry for being quiet when I should have spoken up, and for pushing away while hoping you&rsquo;d stay close. You matter more to me than being right ever will.</p>
       <p class="closing">Take your time. I&rsquo;m here, and I&rsquo;m listening.</p>
     </div>
-    <div class="heart" aria-hidden="true"></div>
-    <button class="restart" id="btn-restart">Back to the start</button>
+    <div class="result-bottom">
+      <div class="heart" aria-hidden="true"></div>
+      <button class="restart" id="btn-restart">Back to the start</button>
+    </div>
   </section>
 
   <nav class="dots" aria-hidden="true">
