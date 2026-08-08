@@ -339,6 +339,11 @@
     justify-content: space-between;
   }
 
+  #screen-result .apology {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
   .result-bottom {
     display: flex;
     flex-direction: column;
@@ -717,18 +722,20 @@
   function enableTilt() {
     var hoverOnly = window.matchMedia('(hover: hover)').matches;
     if (!hoverOnly || reduced) return;
+    var active = false;
+    scene.addEventListener('pointerenter', function () { active = true; });
+    scene.addEventListener('pointerleave', function () {
+      active = false;
+      card.style.transform = '';
+    });
     document.addEventListener('pointermove', function (e) {
+      if (!active) return;
       var r = card.getBoundingClientRect();
       var px = (e.clientX - r.left) / r.width - 0.5;
       var py = (e.clientY - r.top) / r.height - 0.5;
       card.style.transform =
         'rotateX(' + (-py * 7).toFixed(2) + 'deg) rotateY(' + (px * 9).toFixed(2) + 'deg)';
     }, { passive: true });
-    if (scene) {
-      scene.addEventListener('pointerleave', function () {
-        card.style.transform = '';
-      });
-    }
   }
 
   document.addEventListener('click', function (e) {
@@ -778,6 +785,8 @@
     if (maxCX <= minCX || maxCY <= minCY) return;
     var spanX = maxCX - minCX;
     var spanY = maxCY - minCY;
+    var bandL = minCX + spanX * 0.17;
+    var bandR = maxCX - spanX * 0.17;
     var yRect = yesBtn.getBoundingClientRect();
     var cur = noBtn.getBoundingClientRect();
     var cx = cur.left + cur.width / 2;
@@ -800,14 +809,14 @@
         var d = MIN_D + Math.random() * (MAX_D - MIN_D);
         x = cx + Math.cos(ang) * d;
         y = cy + Math.sin(ang) * d;
-        if (x < minCX || x > maxCX || y < minCY || y > maxCY) continue;
+        if (x < bandL || x > bandR || y < minCY || y > maxCY) continue;
         if (overlaps(x - w / 2, y - h / 2, w, h, yRect)) continue;
         best = { x: x, y: y, d: d };
         break;
       }
       if (!best) {
         for (var k = 0; k < 60 && !best; k++) {
-          x = minCX + Math.random() * spanX;
+          x = bandL + Math.random() * (bandR - bandL);
           y = minCY + Math.random() * spanY;
           if (overlaps(x - w / 2, y - h / 2, w, h, yRect)) continue;
           var dd = Math.abs(x - cx) + Math.abs(y - cy);
@@ -819,7 +828,7 @@
       }
     } else {
       for (var i = 0; i < 40; i++) {
-        x = minCX + Math.random() * spanX;
+        x = bandL + Math.random() * (bandR - bandL);
         y = minCY + Math.random() * spanY;
         if (overlaps(x - w / 2, y - h / 2, w, h, yRect)) continue;
         best = { x: x, y: y, d: 0 };
