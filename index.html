@@ -237,6 +237,17 @@
     transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
   }
 
+  .scene::after {
+    content: "";
+    position: absolute;
+    inset: -34px -60px;
+    z-index: 0;
+    background: radial-gradient(closest-side, rgba(255, 190, 205, 0.5), rgba(150, 110, 220, 0.35) 55%, transparent 80%);
+    filter: blur(26px);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
   .card {
     position: relative;
     z-index: 1;
@@ -245,6 +256,8 @@
     max-height: calc(100vh - 36px);
     max-height: calc(100dvh - 36px);
     overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     display: flex;
     flex-direction: column;
@@ -267,17 +280,6 @@
 
   .card::-webkit-scrollbar {
     display: none;
-  }
-
-  .card::before {
-    content: "";
-    position: absolute;
-    inset: -34px -60px;
-    z-index: -1;
-    background: radial-gradient(closest-side, rgba(255, 190, 205, 0.5), rgba(150, 110, 220, 0.35) 55%, transparent 80%);
-    filter: blur(26px);
-    border-radius: 50%;
-    pointer-events: none;
   }
 
   body.ready .scene {
@@ -414,7 +416,8 @@
 
   #arena {
     position: relative;
-    height: clamp(180px, 36vh, 340px);
+    height: clamp(180px, 34vh, 320px);
+    height: clamp(180px, 34svh, 320px);
     margin-top: clamp(16px, 3vw, 22px);
   }
 
@@ -624,8 +627,8 @@
     bottom: 14px;
     align-self: center;
     margin-top: -52px;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border: 0;
     border-radius: 999px;
     background: rgba(224, 138, 166, 0.18);
@@ -660,6 +663,21 @@
     #btn-no.squish { animation: none; }
     .heart { animation: none; }
     .btn, .restart { transition-duration: 0.05s; }
+  }
+
+  @media (pointer: coarse) {
+    #arena {
+      height: clamp(150px, 30vh, 300px);
+      height: clamp(150px, 30svh, 300px);
+      margin-top: clamp(12px, 2vw, 16px);
+    }
+    .sparkle-row { margin-bottom: 12px; }
+    .sub { margin-top: 8px; }
+    .eyebrow { margin-bottom: 10px; }
+    #btn-no {
+      -webkit-user-select: none;
+      user-select: none;
+    }
   }
 </style>
 </head>
@@ -813,9 +831,9 @@
 
   function updateMoreHint() {
     if (!moreHint) return;
-    var resultActive = document.getElementById('screen-result').classList.contains('active');
-    var scrollable = card.scrollHeight > card.clientHeight + 4;
-    moreHint.classList.toggle('show', resultActive && scrollable);
+    var anyActive = card.querySelector('.screen.active');
+    var scrollable = card.scrollHeight > card.clientHeight + 8;
+    moreHint.classList.toggle('show', !!anyActive && scrollable);
     card.classList.toggle('scrollable', scrollable);
   }
 
@@ -843,11 +861,9 @@
       else dots[d].removeAttribute('aria-current');
     }
     updateMoreHint();
-    if (name === 'result') {
-      setTimeout(updateMoreHint, 500);
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(updateMoreHint);
-      }
+    setTimeout(updateMoreHint, 500);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(updateMoreHint);
     }
   }
 
@@ -961,6 +977,7 @@
 
   noBtn.addEventListener('pointerdown', function (e) {
     e.preventDefault();
+    if (e.pointerType === 'touch') return;
     lastPX = e.clientX;
     lastPY = e.clientY;
     dodge();
